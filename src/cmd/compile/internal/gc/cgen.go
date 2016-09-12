@@ -2373,6 +2373,11 @@ func Ginscall(f *Node, proc int) {
 						Thearch.Ginsnop()
 					}
 				}
+				if Ctxt.Arch.Family == sys.ARM && !Ctxt.Flag_largemodel {
+					// On ARM we always back up two instructions.
+					// For non-large build, insert another NOP.
+					Thearch.Ginsnop()
+				}
 			}
 
 			p := Thearch.Gins(obj.ACALL, nil, f)

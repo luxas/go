@@ -148,9 +148,9 @@ func Main() {
 	goos = obj.Getgoos()
 
 	Nacl = goos == "nacl"
-	if Nacl {
-		flag_largemodel = true
-	}
+	//if Nacl {
+	//	flag_largemodel = true
+	//}
 
 	flag.BoolVar(&compiling_runtime, "+", false, "compiling runtime")
 	obj.Flagcount("%", "debug non-static initializers", &Debug['%'])
@@ -204,9 +204,7 @@ func Main() {
 		flag.BoolVar(&flag_shared, "shared", false, "generate code that can be linked into a shared library")
 		flag.BoolVar(&flag_dynlink, "dynlink", false, "support references to Go symbols defined in other shared libraries")
 	}
-	if Thearch.LinkArch.Family == sys.AMD64 {
-		flag.BoolVar(&flag_largemodel, "largemodel", false, "generate code that assumes a large memory model")
-	}
+	flag.BoolVar(&flag_largemodel, "largemodel", false, "generate code that assumes a large memory model")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "write cpu profile to `file`")
 	flag.StringVar(&memprofile, "memprofile", "", "write memory profile to `file`")
 	flag.Int64Var(&memprofilerate, "memprofilerate", 0, "set runtime.MemProfileRate to `rate`")
@@ -216,6 +214,7 @@ func Main() {
 	Ctxt.Flag_shared = flag_dynlink || flag_shared
 	Ctxt.Flag_dynlink = flag_dynlink
 	Ctxt.Flag_optimize = Debug['N'] == 0
+	Ctxt.Flag_largemodel = flag_largemodel
 
 	Ctxt.Debugasm = int32(Debug['S'])
 	Ctxt.Debugvlog = int32(Debug['v'])

@@ -465,7 +465,7 @@ CALLFN(·call1073741824, 1073741824)
 // (And double-check that pop is atomic in that way.)
 TEXT runtime·jmpdefer(SB),NOSPLIT,$0-8
 	MOVW	0(R13), LR
-	MOVW	$-4(LR), LR	// BL deferreturn
+	MOVW	$-8(LR), LR	// BL deferreturn
 	MOVW	fv+0(FP), R7
 	MOVW	argp+4(FP), R13
 	MOVW	$-4(R13), R13	// SP is 4 below argp, due to saved LR

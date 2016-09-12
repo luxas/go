@@ -1400,6 +1400,11 @@ func livenessepilogue(lv *Liveness) {
 							// the call.
 							prev = prev.Opt.(*obj.Prog)
 						}
+						if Ctxt.Arch.Family == sys.ARM && !Ctxt.Flag_largemodel {
+							// On ARM we always back up two instructions.
+							// For non-large build, there is another NOP.
+							prev = prev.Opt.(*obj.Prog)
+						}
 						splicebefore(lv, bb, newpcdataprog(prev, pos), prev)
 					} else {
 						splicebefore(lv, bb, newpcdataprog(p, pos), p)

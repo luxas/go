@@ -584,6 +584,7 @@ func preprocess(ctxt *obj.Link, cursym *obj.LSym) {
 			p.As = ABL
 			p.Lineno = q1.Lineno
 			p.To.Type = obj.TYPE_BRANCH
+			p.To.Name = obj.NAME_EXTERN
 			switch o {
 			case ADIV:
 				p.To.Sym = ctxt.Sym_div
@@ -687,6 +688,7 @@ func softfloat(ctxt *obj.Link, cursym *obj.LSym) {
 			p.Link = next
 			p.As = ABL
 			p.To.Type = obj.TYPE_BRANCH
+			p.To.Name = obj.NAME_EXTERN
 			p.To.Sym = symsfloat
 			p.Lineno = next.Lineno
 
@@ -820,6 +822,7 @@ func stacksplit(ctxt *obj.Link, p *obj.Prog, framesize int32) *obj.Prog {
 	call := obj.Appendp(ctxt, movw)
 	call.As = obj.ACALL
 	call.To.Type = obj.TYPE_BRANCH
+	call.To.Name = obj.NAME_EXTERN
 	morestack := "runtime.morestack"
 	switch {
 	case ctxt.Cursym.Cfunc:

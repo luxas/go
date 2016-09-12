@@ -410,6 +410,11 @@ func machoreloc1(r *ld.Reloc, sectoff int64) int {
 	return 0
 }
 
+// sign extend a 24-bit integer
+func signext24(x int64) int32 {
+	return (int32(x) << 8) >> 8
+}
+
 func archreloc(r *ld.Reloc, s *ld.LSym, val *int64) int {
 	if ld.Linkmode == ld.LinkExternal {
 		switch r.Type {
@@ -445,6 +450,9 @@ func archreloc(r *ld.Reloc, s *ld.LSym, val *int64) int {
 
 			*val = int64(braddoff(int32(0xff000000&uint32(r.Add)), int32(0xffffff&uint32(r.Xadd/4))))
 			return 0
+
+		case obj.R_CALLARMLARGE:
+			return 0
 		}
 
 		return -1
@@ -479,8 +487,16 @@ func archreloc(r *ld.Reloc, s *ld.LSym, val *int64) int {
 		return 0
 
 	case obj.R_CALLARM: // bl XXXXXX or b YYYYYY
-		*val = int64(braddoff(int32(0xff000000&uint32(r.Add)), int32(0xffffff&uint32((ld.Symaddr(r.Sym)+int64((uint32(r.Add))*4)-(s.Value+int64(r.Off)))/4))))
+		// low 24-bit encodes the target address
+		t := (ld.Symaddr(r.Sym) + int64(signext24(r.Add&0xffffff)*4) - (s.Value + int64(r.Off))) / 4
+		if t > 0x7fffff || t < -0x800000 {
+			ld.Diag("direct call too far %d, should build with -gcflags -largemodel", t)
+		}
+		*val = int64(braddoff(int32(0xff000000&uint32(r.Add)), int32(0xffffff&t)))
 
+		return 0
+
+	case obj.R_CALLARMLARGE:
 		return 0
 	}
 

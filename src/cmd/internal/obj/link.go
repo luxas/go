@@ -588,6 +588,11 @@ const (
 	// R_ADDRMIPSTLS (only used on mips64) resolves to the low 16 bits of a TLS
 	// address (offset from thread pointer), by encoding it into the instruction.
 	R_ADDRMIPSTLS
+
+	// R_CALLARMLARGE applies on an indirect CALL with known target used on large mode.
+	// Currently it does nothing but tell the linker the target for stack split check.
+	// In the future linker may optimize this to a NOP and a direct CALL if it is safe.
+	R_CALLARMLARGE
 )
 
 type Auto struct {
@@ -617,52 +622,53 @@ const (
 // Link holds the context for writing object code from a compiler
 // to be linker input or for reading that input into the linker.
 type Link struct {
-	Goarm         int32
-	Headtype      int
-	Arch          *LinkArch
-	Debugasm      int32
-	Debugvlog     int32
-	Debugdivmod   int32
-	Debugpcln     int32
-	Flag_shared   bool
-	Flag_dynlink  bool
-	Flag_optimize bool
-	Bso           *bufio.Writer
-	Pathname      string
-	Goroot        string
-	Goroot_final  string
-	Hash          map[SymVer]*LSym
-	LineHist      LineHist
-	Imports       []string
-	Plist         *Plist
-	Plast         *Plist
-	Sym_div       *LSym
-	Sym_divu      *LSym
-	Sym_mod       *LSym
-	Sym_modu      *LSym
-	Plan9privates *LSym
-	Curp          *Prog
-	Printp        *Prog
-	Blitrl        *Prog
-	Elitrl        *Prog
-	Rexflag       int
-	Vexflag       int
-	Rep           int
-	Repn          int
-	Lock          int
-	Asmode        int
-	AsmBuf        AsmBuf // instruction buffer for x86
-	Instoffset    int64
-	Autosize      int32
-	Armsize       int32
-	Pc            int64
-	DiagFunc      func(string, ...interface{})
-	Mode          int
-	Cursym        *LSym
-	Version       int
-	Textp         *LSym
-	Etextp        *LSym
-	Errors        int
+	Goarm           int32
+	Headtype        int
+	Arch            *LinkArch
+	Debugasm        int32
+	Debugvlog       int32
+	Debugdivmod     int32
+	Debugpcln       int32
+	Flag_shared     bool
+	Flag_dynlink    bool
+	Flag_optimize   bool
+	Flag_largemodel bool // generate code that assumes a large memory model
+	Bso             *bufio.Writer
+	Pathname        string
+	Goroot          string
+	Goroot_final    string
+	Hash            map[SymVer]*LSym
+	LineHist        LineHist
+	Imports         []string
+	Plist           *Plist
+	Plast           *Plist
+	Sym_div         *LSym
+	Sym_divu        *LSym
+	Sym_mod         *LSym
+	Sym_modu        *LSym
+	Plan9privates   *LSym
+	Curp            *Prog
+	Printp          *Prog
+	Blitrl          *Prog
+	Elitrl          *Prog
+	Rexflag         int
+	Vexflag         int
+	Rep             int
+	Repn            int
+	Lock            int
+	Asmode          int
+	AsmBuf          AsmBuf // instruction buffer for x86
+	Instoffset      int64
+	Autosize        int32
+	Armsize         int32
+	Pc              int64
+	DiagFunc        func(string, ...interface{})
+	Mode            int
+	Cursym          *LSym
+	Version         int
+	Textp           *LSym
+	Etextp          *LSym
+	Errors          int
 
 	Framepointer_enabled bool
 

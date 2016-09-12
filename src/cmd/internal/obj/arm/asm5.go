@@ -585,6 +585,30 @@ func span5(ctxt *obj.Link, cursym *obj.LSym) {
 			break
 		}
 
+		if ctxt.Flag_largemodel && (p.As == AB || p.As == ABL || p.As == obj.ADUFFZERO || p.As == obj.ADUFFCOPY) && p.To.Name == obj.NAME_EXTERN {
+			// in large mode, emit indirect call
+			//	MOVW	$target, Rtmp
+			//	BL	(Rtmp)
+			// use REGLINK as Rtmp, as soft div calls expects REGTMP to pass argument
+			tmp := int16(REGLINK)
+			q := obj.Appendp(ctxt, p)
+			q.As = ABL
+			if p.As == AB {
+				q.As = AB
+				tmp = REGTMP // should not clobber REGLINK in this case
+			}
+			q.To.Type = obj.TYPE_MEM
+			q.To.Reg = tmp
+			q.To.Sym = p.To.Sym // tell asmout to emits R_CALLARMLARGE reloc
+
+			p.As = AMOVW
+			p.From = p.To // jump target
+			p.From.Type = obj.TYPE_ADDR
+			p.To = obj.Addr{}
+			p.To.Type = obj.TYPE_REG
+			p.To.Reg = tmp
+		}
+
 		ctxt.Curp = p
 		p.Pc = int64(c)
 		o = oplook(ctxt, p)
@@ -1583,6 +1607,14 @@ func asmout(ctxt *obj.Link, p *obj.Prog, o *Optab, out []uint32) {
 		}
 		o1 = oprrr(ctxt, ABL, int(p.Scond))
 		o1 |= (uint32(p.To.Reg) & 15) << 0
+		if p.To.Sym != nil {
+			rel := obj.Addrel(ctxt.Cursym)
+			rel.Off = int32(ctxt.Pc)
+			rel.Siz = 4
+			rel.Sym = p.To.Sym
+			rel.Type = obj.R_CALLARMLARGE
+			break
+		}
 		rel := obj.Addrel(ctxt.Cursym)
 		rel.Off = int32(ctxt.Pc)
 		rel.Siz = 0
